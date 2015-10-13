@@ -127,4 +127,22 @@ static GPSLocationPicker *picker = nil;
     [_locationManager stopUpdatingLocation];
 }
 
+- (void)geocodeAddressWithCoordinate:(CLLocationCoordinate2D)loc completion:(void (^)(NSString *))completion
+{
+    CLGeocoder *geoCoder = [[CLGeocoder alloc] init];
+    CLLocation *mycurLocaton=[[CLLocation alloc]initWithLatitude:loc.latitude longitude:loc.longitude];
+    
+    //反解析
+    [geoCoder reverseGeocodeLocation:mycurLocaton completionHandler:^(NSArray *places,NSError *error){
+        //取得第一个地标，地标中存储了详细的地址信息，注意：一个地名可能搜索出多个地址
+        CLPlacemark *placemark = [places firstObject];
+        NSDictionary *addressDic = placemark.addressDictionary;//详细地址信息字典,包含以下部分信息
+        NSString *address = @"";
+        if (addressDic && addressDic[@"FormattedAddressLines"]) {
+            address = addressDic[@"FormattedAddressLines"][0];
+        }
+        completion(address);
+    }];
+}
+
 @end

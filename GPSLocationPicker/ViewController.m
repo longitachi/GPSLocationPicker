@@ -8,6 +8,7 @@
 
 #import "ViewController.h"
 #import "GPSValidLocationPicker.h"
+#import "GPSLocationPicker.h"
 
 @interface ViewController ()
 {
@@ -54,6 +55,11 @@
             _textView.text = [NSString stringWithFormat:@"采集到符合精度的坐标经度%f, 维度%f", location.coordinate.longitude, location.coordinate.latitude];
             NSLog(@"采集到符合精度的坐标经度%f, 维度%f", location.coordinate.longitude, location.coordinate.latitude);
         }
+    }];
+    
+    //反地理编码解析地理位置
+    [[GPSLocationPicker shareGPSLocationPicker] geocodeAddressWithCoordinate:coord completion:^(NSString *address) {
+        NSLog(@"解析到的地址:%@", address);
     }];
 }
 

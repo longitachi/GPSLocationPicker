@@ -31,4 +31,9 @@ typedef void (^LocationResult)(CLLocation *location, NSError *error);
  */
 - (void)stop;
 
+/**
+ * @brief 反地理编码，根据传入坐标，解析地理位置
+ */
+- (void)geocodeAddressWithCoordinate:(CLLocationCoordinate2D)loc completion:(void (^) (NSString *address))completion;
+
 @end
