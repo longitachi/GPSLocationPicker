@@ -43,7 +43,7 @@
     gpsPicker.timeoutPeriod = 5;
     gpsPicker.precision = 10;
     gpsPicker.validDistance = 100;
-    CLLocationCoordinate2D coord = CLLocationCoordinate2DMake(31.13, 121.33);
+    CLLocationCoordinate2D coord = CLLocationCoordinate2DMake(31.138, 121.338);
     gpsPicker.nowCoordinate = coord;
     [gpsPicker startLocationAndCompletion:^(CLLocation *location, NSError *error) {
         if (error) {
