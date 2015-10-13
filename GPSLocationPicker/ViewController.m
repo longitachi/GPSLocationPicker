@@ -40,7 +40,7 @@
     //因为该类设计为单例模式，所以如果多处用则可能出现有些地方设置了变量值保留的问题，所以尽量在调用定位前进行一次重置
     [gpsPicker resetDefaultVariable];
     //测试用值
-    gpsPicker.timeoutPeriod = 20;
+    gpsPicker.timeoutPeriod = 5;
     gpsPicker.precision = 10;
     gpsPicker.validDistance = 100;
     CLLocationCoordinate2D coord = CLLocationCoordinate2DMake(31.13, 121.33);
