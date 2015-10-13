@@ -8,7 +8,6 @@
 ###使用方法非常简单
 
 ```objc
-@interface MJRefreshHeader : MJRefreshComponent
 /** 获取单例对象 */
 GPSValidLocationPicker *gpsPicker = [GPSValidLocationPicker shareGPSValidLocationPicker];
 /** 因为该类设计为单例模式，所以如果多处用则可能出现有些地方设置了变量值保留的问题，所以尽量在调用定位前进行一次重置 */
