@@ -28,6 +28,9 @@
 <p style="margin-top: 0px; margin-bottom: 0px; font-size: 16px; line-height: normal; font-family: Menlo;">
 	&nbsp; &nbsp; gpsPicker.<span style="font-variant-ligatures: no-common-ligatures; color: #4f8187">validDistance</span> = <span style="font-variant-ligatures: no-common-ligatures; color: #272ad8">100</span>;
 </p>
+<p style="margin-top: 0px; margin-bottom: 0px; font-size: 16px; line-height: normal; font-family: 'PingFang SC'; color: rgb(0, 132, 0);">
+	<span style="line-height: normal; font-family: Menlo; color: rgb(0, 0, 0);">&nbsp; &nbsp; </span><span style="line-height: normal; font-family: Menlo;">//</span>这个坐标是测试用的<span style="line-height: normal; font-family: Menlo;">,</span>根据实际需求传入
+</p>
 <p style="margin-top: 0px; margin-bottom: 0px; font-size: 16px; line-height: normal; font-family: Menlo; color: rgb(61, 29, 129);">
 	<span style="font-variant-ligatures: no-common-ligatures; color: #000000">&nbsp; &nbsp; </span><span style="font-variant-ligatures: no-common-ligatures; color: #703daa">CLLocationCoordinate2D</span><span style="font-variant-ligatures: no-common-ligatures; color: #000000"> coord = </span>CLLocationCoordinate2DMake<span style="font-variant-ligatures: no-common-ligatures; color: #000000">(</span><span style="font-variant-ligatures: no-common-ligatures; color: #272ad8">31.138</span><span style="font-variant-ligatures: no-common-ligatures; color: #000000">, </span><span style="font-variant-ligatures: no-common-ligatures; color: #272ad8">121.338</span><span style="font-variant-ligatures: no-common-ligatures; color: #000000">);</span>
 </p>
