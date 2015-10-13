@@ -5,7 +5,7 @@
 
 定位中，如果拿到符合标准的坐标，便可直接回调
 
-###使用方法非常简单
+####使用方法非常简单
 
 ```objc
 /** 获取单例对象 */
@@ -37,8 +37,17 @@ gpsPicker.nowCoordinate = coord;
 @end
 ```
 
-###不显示定位详情的效果图
+####不显示定位详情的效果图
 ![image](https://github.com/longitachi/GPSLocationPicker/blob/master/效果图/不显示定位详情.gif)
 
-###显示定位详情的效果图
+####显示定位详情的效果图
 ![image](https://github.com/longitachi/GPSLocationPicker/blob/master/效果图/显示定位详情.gif)
+
+####反地理编码解析地理位置信息功能
+```objc
+//反地理编码解析地理位置
+[[GPSLocationPicker shareGPSLocationPicker] geocodeAddressWithCoordinate:coord completion:^(NSString *address) {
+    NSLog(@"解析到的地址:%@", address);
+}];
+```
+
