@@ -148,8 +148,11 @@ static GPSValidLocationPicker *_ValidLocationPicker = nil;
 - (void)locationSuccess:(CLLocation *)coord
 {
     NSLog(@"%s", __FUNCTION__);
-    [_timer invalidate];
-    [_waitView hide:YES];
+    if (_timer && [_timer isValid]) {
+        [_timer invalidate];
+    }
+    
+    [_waitView hide:YES afterDelay:.1f];
     [[GPSLocationPicker shareGPSLocationPicker] stop];
     if (_locationResultBlock) {
         _locationResultBlock(coord, nil);
@@ -160,9 +163,13 @@ static GPSValidLocationPicker *_ValidLocationPicker = nil;
 - (void)locationTimeOut:(NSError *)error
 {
     NSLog(@"%s", __FUNCTION__);
-    [_timer invalidate];
+    
+    if (_timer && [_timer isValid]) {
+        [_timer invalidate];
+    }
+    
     [[GPSLocationPicker shareGPSLocationPicker] stop];
-    [_waitView hide:YES];
+    [_waitView hide:YES afterDelay:.1f];
     if (_locationResultBlock) {
         _locationResultBlock(kZeroLocation, kLocationFailedError);
     }
@@ -236,7 +243,7 @@ static GPSValidLocationPicker *_ValidLocationPicker = nil;
 
 - (void)hudWasHidden:(MBProgressHUD *)hud
 {
-    [hud removeFromSuperview];
+    [_waitView removeFromSuperview];
     _waitView = nil;
 }
 
