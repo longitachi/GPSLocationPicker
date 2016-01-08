@@ -86,8 +86,9 @@ static GPSValidLocationPicker *_ValidLocationPicker = nil;
 {
     //这里设置为-1，使GPSLocationPicker拿到坐标后直接回调
     [GPSLocationPicker shareGPSLocationPicker].precision = -1;
+    __weak typeof(self) weakSelf = self;
     [[GPSLocationPicker shareGPSLocationPicker] startLocationAndCompletion:^(CLLocation *location, NSError *error) {
-        [self judgeNowLocationIsValid:location];
+        [weakSelf judgeNowLocationIsValid:location];
     }];
 }
 
@@ -122,6 +123,10 @@ static GPSValidLocationPicker *_ValidLocationPicker = nil;
     if (coordIsValid) {
         NSLog(@"符合了标准:%d", coordIsValid);
         [self locationSuccess:pickCoord];
+    } else {
+        if (self.timeoutPeriod == -100) {
+            [self locationTimeOut:nil];
+        }
     }
 }
 
