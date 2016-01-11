@@ -43,7 +43,7 @@ static GPSLocationPicker *picker = nil;
 {
     self = [super init];
     if (self) {
-        _precision = -1;
+        
     }
     return self;
 }
@@ -107,7 +107,7 @@ static GPSLocationPicker *picker = nil;
     
     NSLog(@"采集到的坐标经度:%f, 维度:%f  精度%f", coord.coordinate.longitude, coord.coordinate.latitude, coord.horizontalAccuracy);
     //判断采集到的精度
-    if (_locationResultBlock && !_isStop && (self.precision == -1 || coord.horizontalAccuracy <= self.precision)) {
+    if (_locationResultBlock && !_isStop) {
         _locationResultBlock(coord, nil);
     }
 }
@@ -116,7 +116,7 @@ static GPSLocationPicker *picker = nil;
 - (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error
 {
     NSLog(@"定位失败:%@", error);
-    if (!_isStop && _precision == -1 && _locationResultBlock) {
+    if (!_isStop && _locationResultBlock) {
         _locationResultBlock(kZeroLocation, error);
     }
 }

@@ -84,8 +84,6 @@ static GPSValidLocationPicker *_ValidLocationPicker = nil;
 
 - (void)startGetLocation
 {
-    //这里设置为-1，使GPSLocationPicker拿到坐标后直接回调
-    [GPSLocationPicker shareGPSLocationPicker].precision = -1;
     __weak typeof(self) weakSelf = self;
     [[GPSLocationPicker shareGPSLocationPicker] startLocationAndCompletion:^(CLLocation *location, NSError *error) {
         [weakSelf judgeNowLocationIsValid:location];
