@@ -59,7 +59,15 @@ static GPSValidLocationPicker *_ValidLocationPicker = nil;
 
 - (void)resetDefaultVariable
 {
-    _nowPrecision = _timeoutPeriod = _precision = _validDistance = _collectDistance = kDefaultValue;
+    _nowPrecision    = kDefaultValue;
+    _timeoutPeriod   = kDefaultValue;
+    _precision       = kDefaultValue;
+    _validDistance   = kDefaultValue;
+    _collectDistance = kDefaultValue;
+    _mode = GPSValidLocationPickerModeDeterminateHorizontalBar;
+    _showWaitView    = YES;
+    _showLocTime     = YES;
+    _showDetailInfo  = YES;
 }
 
 #pragma mark - 启动定位
@@ -72,7 +80,9 @@ static GPSValidLocationPicker *_ValidLocationPicker = nil;
     
     _totalTime = self.timeoutPeriod;
     //显示等待视图
-    [self beginWaiting:@"定位中，请稍后。。。" mode:_totalTime>0?MBProgressHUDModeDeterminateHorizontalBar:MBProgressHUDModeIndeterminate];
+    if (self.showWaitView) {
+        [self beginWaiting:@"定位中，请稍后。。。" mode:_totalTime>0?[self getMatchMode]:MBProgressHUDModeIndeterminate];
+    }
     
     if (_timeoutPeriod > 0) {
         _timer = [NSTimer scheduledTimerWithTimeInterval:1.0f target:self selector:@selector(updateProgress) userInfo:nil repeats:YES];
@@ -80,6 +90,25 @@ static GPSValidLocationPicker *_ValidLocationPicker = nil;
     }
     
     [self startGetLocation];
+}
+
+- (MBProgressHUDMode)getMatchMode
+{
+    switch (self.mode) {
+        case GPSValidLocationPickerModeDeterminateHorizontalBar:
+            return MBProgressHUDModeDeterminateHorizontalBar;
+            
+        case GPSValidLocationPickerModeAnnularDeterminate:
+            return MBProgressHUDModeAnnularDeterminate;
+            
+        case GPSValidLocationPickerModeIndeterminate:
+            return MBProgressHUDModeIndeterminate;
+            
+        case GPSValidLocationPickerModeDeterminate:
+            return MBProgressHUDModeDeterminate;
+        default:
+            break;
+    }
 }
 
 - (void)startGetLocation
@@ -97,6 +126,9 @@ static GPSValidLocationPicker *_ValidLocationPicker = nil;
     
     //首先判断坐标是否有效
     if ( pickCoord.coordinate.latitude == 0 || pickCoord.coordinate.longitude == 0) {
+        if (_timeoutPeriod == kDefaultValue) {
+            [self locationTimeOut:nil];
+        }
         return;
     }
     
@@ -108,7 +140,7 @@ static GPSValidLocationPicker *_ValidLocationPicker = nil;
     
     BOOL coordIsValid = YES;
     
-    if (_precision != kDefaultValue && _nowPrecision >= _precision) {
+    if (_precision != kDefaultValue && _nowPrecision > _precision) {
         coordIsValid = NO;
     }
     if (_validDistance != kDefaultValue
@@ -122,7 +154,7 @@ static GPSValidLocationPicker *_ValidLocationPicker = nil;
         NSLog(@"符合了标准:%d", coordIsValid);
         [self locationSuccess:pickCoord];
     } else {
-        if (self.timeoutPeriod == -100) {
+        if (_timeoutPeriod == kDefaultValue) {
             [self locationTimeOut:nil];
         }
     }
@@ -136,12 +168,15 @@ static GPSValidLocationPicker *_ValidLocationPicker = nil;
         [self locationTimeOut:[NSError errorWithDomain:@"location failed" code:-1 userInfo:nil]];
         return;
     }
-    
-    if (!_waitView) {
-        [self beginWaiting:@"定位中，请稍后。。。" mode:MBProgressHUDModeDeterminateHorizontalBar];
-    }
     _timeoutPeriod--;
-   _waitView.detailsLabelText = [self getGPSDetailInfo];
+    if (self.showWaitView) {
+        if (!_waitView) {
+            [self beginWaiting:@"定位中，请稍后。。。" mode:MBProgressHUDModeDeterminateHorizontalBar];
+        }
+        _waitView.detailsLabelText = [self getGPSDetailInfo];
+    }
+    
+     //更新进度条
     if (_totalTime > 0) {
         _waitView.progress = (float)(_totalTime-_timeoutPeriod)/_totalTime;
     }
@@ -154,8 +189,7 @@ static GPSValidLocationPicker *_ValidLocationPicker = nil;
     if (_timer && [_timer isValid]) {
         [_timer invalidate];
     }
-    
-    [_waitView hide:YES afterDelay:.1f];
+    [_waitView hide:YES afterDelay:0];
     [[GPSLocationPicker shareGPSLocationPicker] stop];
     if (_locationResultBlock) {
         _locationResultBlock(coord, nil);
@@ -166,13 +200,11 @@ static GPSValidLocationPicker *_ValidLocationPicker = nil;
 - (void)locationTimeOut:(NSError *)error
 {
     NSLog(@"%s", __FUNCTION__);
-    
     if (_timer && [_timer isValid]) {
         [_timer invalidate];
     }
-    
     [[GPSLocationPicker shareGPSLocationPicker] stop];
-    [_waitView hide:YES afterDelay:.1f];
+    [_waitView hide:YES afterDelay:0];
     if (_locationResultBlock) {
         _locationResultBlock(kZeroLocation, kLocationFailedError);
     }
@@ -180,35 +212,40 @@ static GPSValidLocationPicker *_ValidLocationPicker = nil;
 
 - (NSString *)getGPSDetailInfo
 {
-    //是否显示gps详情 (根据用户需要进行设置)
-    BOOL isShowGPSDetail = [[NSUserDefaults standardUserDefaults] boolForKey:kIsShowGPSDetailInfo];
-    
+    //是否显示gps定位时间
     NSMutableString *detailStr = [NSMutableString string];
-    if (_timeoutPeriod != kDefaultValue) {
-        if (_timeoutPeriod >= 0) {
-            [detailStr appendString:[NSString stringWithFormat:@"等待时间:%d", _timeoutPeriod]];
-        } else {
-            [detailStr appendString:@"定位超时"];
+    if (self.showLocTime) {
+        if (_timeoutPeriod != kDefaultValue) {
+            if (_timeoutPeriod >= 0) {
+                [detailStr appendString:[NSString stringWithFormat:@"等待时间:%d", _timeoutPeriod]];
+            } else {
+                [detailStr appendString:@"定位超时"];
+            }
         }
     }
-    if (_precision != kDefaultValue && isShowGPSDetail) {
-        [detailStr appendString:[NSString stringWithFormat:@"\n标准精度:%.0f米", self.precision]];
+    
+    //如果不显示详情，则直接返回
+    if (self.showDetailInfo == NO) {
+        return detailStr;
+    }
+    if (_precision != kDefaultValue) {
+        [detailStr appendString:[NSString stringWithFormat:@"\n期望精度:%.0f米", self.precision]];
         if (_nowPrecision != kDefaultValue) {
             [detailStr appendString:[NSString stringWithFormat:@"\n当前精度:%.0f米", _nowPrecision]];
         }
     }
-    if (_validDistance != kDefaultValue && isShowGPSDetail) {
-        [detailStr appendString:[NSString stringWithFormat:@"\n标准距离:%.0f米", self.validDistance]];
+    if (_validDistance != kDefaultValue) {
+        [detailStr appendString:[NSString stringWithFormat:@"\n期望距离:%.0f米", self.validDistance]];
         if (_collectDistance != kDefaultValue) {
             [detailStr appendString:[NSString stringWithFormat:@"\n当前距离:%.0f米", _collectDistance]];
         } else {
             [detailStr appendFormat:@"\n当前距离∞米"];
         }
     }
-    return detailStr.length == 0 ? @"" : detailStr;
+    NSString *info = [detailStr stringByTrimmingCharactersInSet:[NSCharacterSet  whitespaceAndNewlineCharacterSet]];
+    return info.length == 0 ? @"" : info;
 }
 
-#pragma mark - 计算采集到的坐标与传入坐标距离是否符合标准
 - (BOOL)coordIsValid:(CLLocation *)nowLocation
 {
     if (nowLocation.coordinate.latitude == 0 || nowLocation.coordinate.longitude == 0) {

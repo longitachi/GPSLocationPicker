@@ -13,26 +13,22 @@
 @interface ViewController ()
 {
     IBOutlet UISwitch *_mySwitch;
-    IBOutlet UITextView *_textView;
 }
+
+@property (weak, nonatomic) IBOutlet UITextView *textView;
+
+
 @end
 
 @implementation ViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    _mySwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:kIsShowGPSDetailInfo];
     _textView.text = nil;
     _textView.layer.masksToBounds = YES;
     _textView.layer.cornerRadius = 3.0f;
     _textView.layer.borderColor = [UIColor lightGrayColor].CGColor;
     _textView.layer.borderWidth = 1.0f;
-}
-
-- (IBAction)switchChanged:(id)sender
-{
-    [[NSUserDefaults standardUserDefaults] setBool:_mySwitch.isOn forKey:kIsShowGPSDetailInfo];
-    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 - (IBAction)btnLocation_click:(id)sender
@@ -42,24 +38,31 @@
     [gpsPicker resetDefaultVariable];
     //测试用值
     gpsPicker.timeoutPeriod = 5;
-    gpsPicker.precision = 10;
-    gpsPicker.validDistance = 100;
+    gpsPicker.precision = 100;
+    gpsPicker.validDistance = 1000;
+    //下面三个变量的默认值均为yes
+    gpsPicker.showWaitView = YES;
+    gpsPicker.showLocTime = YES;
+    gpsPicker.showDetailInfo = YES;
+    
+    gpsPicker.mode = GPSValidLocationPickerModeDeterminateHorizontalBar;
     //这个坐标是测试用的,根据实际需求传入
     CLLocationCoordinate2D coord = CLLocationCoordinate2DMake(31.138, 121.338);
     gpsPicker.nowCoordinate = coord;
+    
+    __weak typeof(self) weakSelf = self;
     [gpsPicker startLocationAndCompletion:^(CLLocation *location, NSError *error) {
         if (error) {
-            _textView.text = [NSString stringWithFormat:@"未采集到符合精度的坐标，错误信息:%@", error];
+            weakSelf.textView.text = [NSString stringWithFormat:@"未采集到符合精度的坐标，错误信息:%@", error];
             NSLog(@"未采集到符合精度的坐标，错误信息:%@", error);
         } else {
-            _textView.text = [NSString stringWithFormat:@"采集到符合精度的坐标经度%f, 维度%f", location.coordinate.longitude, location.coordinate.latitude];
             NSLog(@"采集到符合精度的坐标经度%f, 维度%f", location.coordinate.longitude, location.coordinate.latitude);
+            //反地理编码解析地理位置
+            [[GPSLocationPicker shareGPSLocationPicker] geocodeAddressWithCoordinate:location.coordinate completion:^(NSString *address) {
+                NSLog(@"解析到的地址:%@", address);
+                weakSelf.textView.text = [NSString stringWithFormat:@"采集到符合精度的坐标经度：%f \n维度：%f \n对应地址：%@", location.coordinate.longitude, location.coordinate.latitude, address];
+            }];
         }
-    }];
-    
-    //反地理编码解析地理位置
-    [[GPSLocationPicker shareGPSLocationPicker] geocodeAddressWithCoordinate:coord completion:^(NSString *address) {
-        NSLog(@"解析到的地址:%@", address);
     }];
 }
 

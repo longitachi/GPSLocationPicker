@@ -10,7 +10,16 @@
 #import <CoreLocation/CoreLocation.h>
 #import <UIKit/UIKit.h>
 
-#define kIsShowGPSDetailInfo @"isShowDetailInfo"
+typedef enum : NSUInteger {
+    /** Progress is shown using a horizontal progress bar This is the default */
+    GPSValidLocationPickerModeDeterminateHorizontalBar,
+    /** Progress is shown using a round, pie-chart like, progress view. */
+    GPSValidLocationPickerModeDeterminate,
+    /** Progress is shown using an UIActivityIndicatorView.*/
+    GPSValidLocationPickerModeIndeterminate,
+    /** Progress is shown using a ring-shaped progress view. */
+    GPSValidLocationPickerModeAnnularDeterminate,
+} GPSValidLocationPickerMode;
 
 typedef void (^ValidLocationResult)(CLLocation *location, NSError *error);
 
@@ -22,9 +31,18 @@ typedef void (^ValidLocationResult)(CLLocation *location, NSError *error);
 @property (nonatomic, assign) CLLocationAccuracy precision;
 //当前坐标
 @property (nonatomic, assign) CLLocationCoordinate2D nowCoordinate;
-//定位有效距离（单位:m），默认为-100
+//定位期望的有效距离（单位:m），默认为-100，设置该属性时，必须把用户当前坐标传进来，即nowCoordinate
 @property (nonatomic, assign) CLLocationDistance validDistance;
 
+/**是否显示等待框 默认为YES*/
+@property (nonatomic, assign) BOOL showWaitView;
+/**等待框样式*/
+@property (nonatomic, assign) GPSValidLocationPickerMode mode;
+
+/**等待框中是否显示剩余时间 默认为YES*/
+@property (nonatomic, assign) BOOL showLocTime;
+/**等待框中是否显示详细信息 默认为YES*/
+@property (nonatomic, assign) BOOL showDetailInfo;
 
 + (instancetype)shareGPSValidLocationPicker;
 /**
